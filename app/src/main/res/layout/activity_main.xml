@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.pri.currencyconverter.ui.main.MainActivityViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        tools:context="com.pri.currencyconverter.ui.main.MainActivity">
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            app:layout_constraintEnd_toEndOf="@+id/tvSpinnerLabel"
+            app:layout_constraintStart_toStartOf="@+id/tvSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvSpinnerLabel" />
+
+        <TextView
+            android:id="@+id/tvSpinnerLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:text="@string/select_country"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/etCurrency"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="@string/amount"
+            android:inputType="numberDecimal"
+            android:singleLine="true"
+            android:text="@={viewModel.amountWithoutTax}"
+            app:layout_constraintEnd_toEndOf="@+id/tvSpinnerLabel"
+            app:layout_constraintStart_toStartOf="@+id/tvSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/spinner" />
+
+        <TextView
+            android:id="@+id/tvTaxRateLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/select_tax_rate_type"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            app:layout_constraintEnd_toEndOf="@+id/tvSpinnerLabel"
+            app:layout_constraintStart_toStartOf="@+id/tvSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/etCurrency" />
+
+        <RadioGroup
+            android:id="@+id/rgTaxRate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/tvSpinnerLabel"
+            app:layout_constraintStart_toStartOf="@+id/tvSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvTaxRateLabel" />
+
+        <TextView
+            android:id="@+id/tvTaxResultLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Amount with Tax is: "
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/tvSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/rgTaxRate" />
+
+
+        <TextView
+            android:id="@+id/tvTaxResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="@={viewModel.amountWithTax}"
+            android:textColor="@color/blue"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@+id/tvTaxResultLabel"
+            app:layout_constraintTop_toTopOf="@+id/tvTaxResultLabel" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{viewModel.isLoading()?View.VISIBLE : View.GONE, default=gone}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CurrencyConverter</string>
+    <string name="select_country">Select Country</string>
+    <string name="select_tax_rate_type">Select Tax Rate Type</string>
+    <string name="amount">Amount</string>
+    <string name="calculate">Calculate</string>
+</resources>
