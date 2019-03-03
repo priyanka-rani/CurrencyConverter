@@ -1,61 +1,52 @@
 package com.pri.currencyconverter.ui.main
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
-import android.databinding.Observable
 import android.os.Bundle
-import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.widget.*
-import dagger.android.support.DaggerAppCompatActivity
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.subscribeBy
 import com.pri.currencyconverter.R
 import com.pri.currencyconverter.api.model.Rate
 import com.pri.currencyconverter.databinding.ActivityMainBinding
+import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
 
 class MainActivity : DaggerAppCompatActivity() {
 
-    private val mapping = SparseArray<RadioButton>()
-
-    private val compositeDisposable by lazy { CompositeDisposable() }
-
     @Inject
-    lateinit var mainActivityViewModel: MainActivityViewModel
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    var mainActivityViewModel: MainActivityViewModel? = null
     private lateinit var binding: ActivityMainBinding
 
-
+    private val mapping = SparseArray<RadioButton>()
     private var selectedRate: Double? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        mainActivityViewModel = ViewModelProviders.of(this, viewModelFactory)
+                .get(MainActivityViewModel::class.java)
+
         binding.viewModel = mainActivityViewModel
+        binding.lifecycleOwner = this
 
-        mainActivityViewModel.setIsLoading(true)
+        mainActivityViewModel!!.setIsLoading(true)
 
-        compositeDisposable.add(mainActivityViewModel.showDataFromApi()
-                .subscribeBy(onSuccess = {
-                    updateUIWithCurrencyList(it.rates)
-                    mainActivityViewModel.setIsLoading(false)
-                }, onError = {
-                    /**/
-                    Log.d("MainActivity", it.message)
-                    mainActivityViewModel.setIsLoading(false)
-                }))
+        mainActivityViewModel!!.rateList.observe(this@MainActivity, Observer {
+            it?.let { it1 -> updateUIWithCurrencyList(it1) }
+        })
 
-    }
+        mainActivityViewModel!!.amountWithoutTax.observe(this@MainActivity, Observer {
+            it?.let {
+                mainActivityViewModel!!.calculateResult(selectedRate)
+            }
+        })
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        mainActivityViewModel.amountWithoutTax.addOnPropertyChangedCallback(
-                object: Observable.OnPropertyChangedCallback() {
-                    override fun onPropertyChanged(
-                            observable: Observable?, i: Int) =
-                            mainActivityViewModel.calculateResult(selectedRate)
-                })
     }
 
     fun updateUIWithCurrencyList(currencies: List<Rate>) {
@@ -83,7 +74,7 @@ class MainActivity : DaggerAppCompatActivity() {
         binding.rgTaxRate.setOrientation(LinearLayout.VERTICAL)
         binding.rgTaxRate.setOnCheckedChangeListener(RadioGroup.OnCheckedChangeListener { rg, checkedId ->
             selectedRate = (mapping.get(checkedId) as RadioButton).tag as Double
-            mainActivityViewModel.calculateResult(selectedRate)
+            mainActivityViewModel!!.calculateResult(selectedRate)
         })
         var i = 0
         for (key in rateModels.keys) {
@@ -104,9 +95,5 @@ class MainActivity : DaggerAppCompatActivity() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        compositeDisposable.clear()
-        compositeDisposable.dispose()
-    }
+
 }

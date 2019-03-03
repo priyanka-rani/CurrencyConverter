@@ -1,40 +1,63 @@
 package com.pri.currencyconverter.ui.main
 
-import android.databinding.ObservableBoolean
-import android.databinding.ObservableField
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
 import android.text.TextUtils
-import io.reactivex.Single
-import com.pri.currencyconverter.api.model.CurrencyModel
+import android.util.Log
+import com.pri.currencyconverter.api.model.Rate
 import com.pri.currencyconverter.repository.Repository
 import com.pri.currencyconverter.util.SchedulerProvider
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.subscribeBy
 
 
-class MainActivityViewModel(private val repository: Repository, private val schedulerProvider: SchedulerProvider) {
+class MainActivityViewModel(private val repository: Repository, private val schedulerProvider: SchedulerProvider): ViewModel() {
 
-    val isLoading = ObservableBoolean(false)
+    val isLoading = MutableLiveData<Boolean>().apply { postValue(false) }
 
-    val amountWithTax = ObservableField<String>("")
+    val amountWithTax = MutableLiveData<String>().apply { postValue("") }
 
-    val amountWithoutTax = ObservableField<String>("")
+    val amountWithoutTax = MutableLiveData<String>().apply { postValue("") }
 
+    val rateList = MutableLiveData<List<Rate>>().apply { postValue(ArrayList()) }
 
+    private val compositeDisposable by lazy { CompositeDisposable() }
+
+    init {
+       showDataFromApi()
+    }
     fun setIsLoading(isLoading: Boolean) {
-        this.isLoading.set(isLoading)
+        this.isLoading.value = isLoading
     }
 
-    fun showDataFromApi(): Single<CurrencyModel> = repository.getDataFromApi()
-            .compose(schedulerProvider.getSchedulersForSingle())
+    fun showDataFromApi(){
+        setIsLoading(true)
+        compositeDisposable.add(repository.getDataFromApi()
+                .compose(schedulerProvider.getSchedulersForSingle())
+                .subscribeBy (onSuccess = {
+                    rateList.value = it.rates
+                   setIsLoading(false)
+                }, onError = {
+                    /**/
+                    Log.d("MainActivity", it.message)
+                   setIsLoading(false)
+                }))
+    }
 
     fun calculateResult(value: Double?) {
-        if (!TextUtils.isEmpty(amountWithoutTax.get()) && value != null) {
-            val ammountInput = java.lang.Double.parseDouble(amountWithoutTax.get())
+        if (!TextUtils.isEmpty(amountWithoutTax.value) && value != null) {
+            val amountInput = java.lang.Double.parseDouble(amountWithoutTax.value)
             val taxRate = value
-            val result = ammountInput + ammountInput * taxRate / 100
-            amountWithTax.set(result.toString())
+            val result = amountInput + amountInput * taxRate / 100
+            amountWithTax.value = result.toString()
         } else {
-            amountWithTax.set("")
+            amountWithTax.value = ""
         }
     }
 
-
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.clear()
+        compositeDisposable.dispose()
+    }
 }
