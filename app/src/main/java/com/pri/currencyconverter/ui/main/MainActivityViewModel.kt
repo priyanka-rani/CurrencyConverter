@@ -2,7 +2,6 @@ package com.pri.currencyconverter.ui.main
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import android.text.TextUtils
 import android.util.Log
 import com.pri.currencyconverter.api.model.Rate
 import com.pri.currencyconverter.repository.Repository
@@ -11,7 +10,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.subscribeBy
 
 
-class MainActivityViewModel(private val repository: Repository, private val schedulerProvider: SchedulerProvider): ViewModel() {
+class MainActivityViewModel(private val repository: Repository, private val schedulerProvider: SchedulerProvider) : ViewModel() {
 
     val isLoading = MutableLiveData<Boolean>()
 
@@ -26,37 +25,36 @@ class MainActivityViewModel(private val repository: Repository, private val sche
     private val compositeDisposable by lazy { CompositeDisposable() }
 
     init {
-       showDataFromApi()
+        showDataFromApi()
     }
+
     fun setIsLoading(isLoading: Boolean) {
         this.isLoading.value = isLoading
     }
 
-    fun showDataFromApi(){
+    fun showDataFromApi() {
         setIsLoading(true)
         compositeDisposable.add(repository.getDataFromApi()
                 .compose(schedulerProvider.getSchedulersForSingle())
-                .subscribeBy (onSuccess = {
+                .subscribeBy(onSuccess = {
                     rateList.value = it.rates
-                   setIsLoading(false)
+                    setIsLoading(false)
                 }, onError = {
                     /**/
                     Log.d("MainActivity", it.message)
                     erroMsg.value = it.message
-                   setIsLoading(false)
+                    setIsLoading(false)
                 }))
     }
 
-    fun calculateResult(value: Double?) {
-        if (!TextUtils.isEmpty(amountWithoutTax.value) && value != null) {
-            val amountInput = java.lang.Double.parseDouble(amountWithoutTax.value)
-            val taxRate = value
-            val result = amountInput + amountInput * taxRate / 100
-            amountWithTax.value = result.toString()
-        } else {
-            amountWithTax.value = ""
-        }
-    }
+    fun calculateResult(value: Double?) =
+            if (amountWithoutTax.value.isNullOrBlank() || value == null) {
+                amountWithTax.value = ""
+            } else {
+                val amountInput = java.lang.Double.parseDouble(amountWithoutTax.value)
+                val result = amountInput + amountInput * value / 100
+                amountWithTax.value = result.toString()
+            }
 
     override fun onCleared() {
         super.onCleared()
