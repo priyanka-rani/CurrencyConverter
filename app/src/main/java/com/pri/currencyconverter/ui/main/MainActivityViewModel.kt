@@ -13,13 +13,15 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class MainActivityViewModel(private val repository: Repository, private val schedulerProvider: SchedulerProvider): ViewModel() {
 
-    val isLoading = MutableLiveData<Boolean>().apply { postValue(false) }
+    val isLoading = MutableLiveData<Boolean>()
 
-    val amountWithTax = MutableLiveData<String>().apply { postValue("") }
+    val amountWithTax = MutableLiveData<String>()
 
-    val amountWithoutTax = MutableLiveData<String>().apply { postValue("") }
+    val amountWithoutTax = MutableLiveData<String>()
 
-    val rateList = MutableLiveData<List<Rate>>().apply { postValue(ArrayList()) }
+    val erroMsg = MutableLiveData<String>()
+
+    val rateList = MutableLiveData<List<Rate>>()
 
     private val compositeDisposable by lazy { CompositeDisposable() }
 
@@ -40,6 +42,7 @@ class MainActivityViewModel(private val repository: Repository, private val sche
                 }, onError = {
                     /**/
                     Log.d("MainActivity", it.message)
+                    erroMsg.value = it.message
                    setIsLoading(false)
                 }))
     }

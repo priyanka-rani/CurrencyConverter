@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.util.SparseArray
 import android.view.View
 import android.widget.*
@@ -44,6 +45,11 @@ class MainActivity : DaggerAppCompatActivity() {
         mainActivityViewModel!!.amountWithoutTax.observe(this@MainActivity, Observer {
             it?.let {
                 mainActivityViewModel!!.calculateResult(selectedRate)
+            }
+        })
+        mainActivityViewModel!!.erroMsg.observe(this@MainActivity, Observer {
+            if(!it.isNullOrBlank()) {
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
             }
         })
 

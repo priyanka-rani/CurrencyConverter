@@ -4,4 +4,5 @@
     <string name="select_tax_rate_type">Select Tax Rate Type</string>
     <string name="amount">Amount</string>
     <string name="calculate">Calculate</string>
+    <string name="label_amount_tax">Amount with Tax is:</string>
 </resources>

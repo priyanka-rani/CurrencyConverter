@@ -1,25 +1,12 @@
 package com.pri.currencyconverter
 
-import android.app.Activity
-import android.app.Application
-import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
 import com.pri.currencyconverter.di.DaggerAppComponent
-import javax.inject.Inject
+import dagger.android.support.DaggerApplication
 
-class AndroidApp: Application(), HasActivityInjector {
+class AndroidApp : DaggerApplication() {
+    private val applicationInjector = DaggerAppComponent.builder()
+            .application(this)
+            .build()
 
-    @Inject lateinit var activityDispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
-
-    override fun onCreate() {
-        super.onCreate()
-
-        DaggerAppComponent.builder()
-                .application(this)
-                .build()
-                .inject(this)
-    }
-
-    override fun activityInjector(): AndroidInjector<Activity> = activityDispatchingAndroidInjector
+    override fun applicationInjector() = applicationInjector
 }
